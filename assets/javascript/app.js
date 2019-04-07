@@ -18,6 +18,8 @@ var chatRef = base.ref("/chat");
 
 var amConnected = base.ref(".info/connected");
 
+var onDeck = "";
+
 amConnected.on("value", function(snap) {
   if (snap.val()) {
     var con = connRef.push(true);
@@ -26,13 +28,36 @@ amConnected.on("value", function(snap) {
   //    The connections object changes each time the page is reloaded.  Will have to store a UUID in cookie or localStorage.
 });
 
-rootRef.on("child_added", function(snap){
-    var queueVal = snap.child("queue").val();
-    console.log(snap);
-    if (snap.child("players").numChildren() < 2) {
-        playersRef.push(queueVal[0]);
+queueRef.on("child_added", function(theChild, prevChild){
+    //  This is ... ugly.  This function runs every time a child gets added to 
+    //  queueRef.  It's .on, not .once, 'cuz for some reason the prevChild
+    //  parameter is null when the new child is added, so the bloody thing's 
+    //  got to run through 'em all to set onDeck properly.
+    console.log(theChild.key);
+    console.log(theChild.val());
+    if (prevChild) {
+        return;
+    }
+    else {
+        console.log("next up: "+ theChild.val().name);
+        onDeck = theChild.key;
+        console.log(onDeck);
     }
 });
+
+rootRef.once("value", function(snap){
+    //  This function gets the whole bloody DB 'cuz it's got to check size of 
+    //  the playersRef db before it moves a record from queue to players.
+    var currentQueue = snap.child("queue");
+    var targetRecord = currentQueue.child(onDeck);
+    console.log(snap.val());
+    console.log(currentQueue);
+    if (snap.child("players").numChildren() < 2) {
+        playersRef.update({[onDeck]: targetRecord.val()});
+        targetRecord.remove();
+    }
+});
+
 /* App flow:
 We'll need a few database nodes, say:
     /players (capped at 2 members), 
@@ -65,10 +90,16 @@ var game = {
 
     GetName() {
         this.playerName = prompt("Enter your name:");
-        console.log(this.playerName);
+        // console.log(this.playerName);
         this.playerObj.name = this.playerName;
         this.player = queueRef.push(this.playerObj);
-        console.log(this.player.key);   // store the key to access the obj later!
-        this.player.onDisconnect().remove();
-    }
+        this.player.update({uuid: this.player.key});
+        // console.log(this.player.key);   // store the key to access the obj later!
+        // this.player.onDisconnect().remove();
+    },
+
+    BuildQueue(childSnap, prevSnap){
+        
+    },
+    PushPlayers(dbSnap){},
 }
