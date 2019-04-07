@@ -1,11 +1,11 @@
 // Initialize Firebase
 var config = {
-  apiKey: "AIzaSyCQzT-mGnK0zzffuepw_fWKwhpvr0IAbt8",
-  authDomain: "unseen1.firebaseapp.com",
-  databaseURL: "https://unseen1.firebaseio.com",
-  projectId: "unseen1",
-  storageBucket: "unseen1.appspot.com",
-  messagingSenderId: "712966785851"
+    apiKey: "AIzaSyCQzT-mGnK0zzffuepw_fWKwhpvr0IAbt8",
+    authDomain: "unseen1.firebaseapp.com",
+    databaseURL: "https://unseen1.firebaseio.com",
+    projectId: "unseen1",
+    storageBucket: "unseen1.appspot.com",
+    messagingSenderId: "712966785851"
 };
 firebase.initializeApp(config);
 
@@ -20,42 +20,44 @@ var amConnected = base.ref(".info/connected");
 
 var onDeck = "";
 
-amConnected.on("value", function(snap) {
-  if (snap.val()) {
-    var con = connRef.push(true);
-    con.onDisconnect().remove();
-  }
-  //    The connections object changes each time the page is reloaded.  Will have to store a UUID in cookie or localStorage.
+amConnected.on("value", function (snap) {
+    if (snap.val()) {
+        var con = connRef.push(true);
+        con.onDisconnect().remove();
+    }
+    //    The connections object changes each time the page is reloaded.  Will have to store a UUID in cookie or localStorage.
 });
 
-queueRef.on("child_added", function(theChild, prevChild){
+queueRef.on("child_added", function(theChild, prevChild) {
     //  This is ... ugly.  This function runs every time a child gets added to 
     //  queueRef.  It's .on, not .once, 'cuz for some reason the prevChild
     //  parameter is null when the new child is added, so the bloody thing's 
     //  got to run through 'em all to set onDeck properly.
-    console.log(theChild.key);
-    console.log(theChild.val());
-    if (prevChild) {
-        return;
-    }
-    else {
-        console.log("next up: "+ theChild.val().name);
-        onDeck = theChild.key;
-        console.log(onDeck);
-    }
+    game.BuildQueue(theChild, prevChild);
+    // console.log(theChild.key);
+    // console.log(theChild.val());
+    // if (prevChild) {
+    //     return;
+    // }
+    // else {
+    //     console.log("next up: " + theChild.val().name);
+    //     onDeck = theChild.key;
+    //     console.log(onDeck);
+    // }
 });
 
-rootRef.once("value", function(snap){
+rootRef.once("value", function (snap) {
     //  This function gets the whole bloody DB 'cuz it's got to check size of 
     //  the playersRef db before it moves a record from queue to players.
-    var currentQueue = snap.child("queue");
-    var targetRecord = currentQueue.child(onDeck);
-    console.log(snap.val());
-    console.log(currentQueue);
-    if (snap.child("players").numChildren() < 2) {
-        playersRef.update({[onDeck]: targetRecord.val()});
-        targetRecord.remove();
-    }
+    game.PushPlayers(snap);
+    // var currentQueue = snap.child("queue");
+    // var targetRecord = currentQueue.child(onDeck);
+    // console.log(snap.val());
+    // console.log(currentQueue);
+    // if (snap.child("players").numChildren() < 2) {
+    //     playersRef.update({ [onDeck]: targetRecord.val() });
+    //     targetRecord.remove();
+    // }
 });
 
 /* App flow:
@@ -81,9 +83,12 @@ We'll need a few database nodes, say:
 */
 
 var game = {
-    playerName: "",
-    player: "",
-    playerObj: {"name": "",
+    onDeck: "",
+    playerName: "", // maybe don't need to store this...
+    playerRef: "",  // reference to the player's node.  Not sure it'll update when we start moving things around, so:
+    playerID: "",   // store the key/uuid here
+    playerObj: {
+        "name": "",
         "wins": 0,
         "losses": 0,
     },
@@ -92,14 +97,34 @@ var game = {
         this.playerName = prompt("Enter your name:");
         // console.log(this.playerName);
         this.playerObj.name = this.playerName;
-        this.player = queueRef.push(this.playerObj);
-        this.player.update({uuid: this.player.key});
-        // console.log(this.player.key);   // store the key to access the obj later!
+        this.playerRef = queueRef.push(this.playerObj);
+        this.playerRef.update({ uuid: this.playerRef.key });  // think I've figured out how to make this unnecessary, but I'll keep it for now.
+        this.playerID = this.playerRef.key;   // store the key to access the obj later!
         // this.player.onDisconnect().remove();
     },
 
-    BuildQueue(childSnap, prevSnap){
-        
+    BuildQueue(childSnap, prevSnap) {
+        console.log(childSnap.key);
+        console.log(childSnap.val());
+        if (prevSnap) {
+            return;
+        }
+        else {
+            console.log("next up: " + childSnap.val().name);
+            this.onDeck = childSnap.key;
+            console.log(this.onDeck);
+        }
     },
-    PushPlayers(dbSnap){},
+    PushPlayers(dbSnap) {
+        var currentQueue = dbSnap.child("queue");
+        var targetRecord = currentQueue.child(this.onDeck);
+        console.log(dbSnap.val());
+        console.log(currentQueue);
+        console.log(targetRecord);
+        if (dbSnap.child("players").numChildren() < 2) {
+            playersRef.update({ [this.onDeck]: targetRecord.val() });
+            queueRef.child(this.onDeck).remove();
+        }
+
+    },
 }
