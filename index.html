@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="assets/css/style.css">
     <script src="https://code.jquery.com/jquery-3.3.1.js"
         integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/5.9.3/firebase-app.js"></script>
@@ -26,31 +27,65 @@
             <!-- Player area -->
             <div class="col">
                 <!-- Player "one" -->
-                <div class="card"></div>
+                <div class="card">
+                    <div class="card-header">Player 1</div>
+                    <h5 class="card-title" id="p1-name">Player 1</h5>
+                    <p>Wins: <span id="p1-wins"></span></p>
+                    <p>Losses: <span id="p1-losses"></span></p>
+                    <p>Choice: <span id="p1-choice"></span></p>
+                </div>
             </div>
             <div class="col">
                 <!-- Player "two" -->
-                <div class="card"></div>
+                <div class="card">
+                    <div class="card-header">Player 2</div>
+                    <h5 class="card-title" id="p2-name">Player 2</h5>
+                    <p>Wins: <span id="p2-wins"></span></p>
+                    <p>Losses: <span id="p2-losses"></span></p>
+                    <p>Choice: <span id="p2-choice"></span></p>
+                </div>
             </div>
         </div>
         <div class="row">
             <!-- Waiting area -->
             <div class="col">
                 <!-- Queue -->
-                <div class="card"></div>
+                <div class="card" id="chat-card">
+                    <div class="card-header">Queue</div>
+                    <div class="container" id="queue-box"></div>
+                </div>
             </div>
             <div class="col">
                 <!-- Chat -->
-                <div class="card"></div>
+                <div class="card" id="chat-card">
+                    <div class="card-header">Smack Talk</div>
+                    <div class="container" id="chat-box"></div>
+                    <div class="card-footer">
+                        <div class="input-group" id="chat-ig">
+                            <input type="text" class="form-control" id="chat-input" placeholder="Talk yo' smack">
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-primary" id="chat-submit">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
     <script src="assets/javascript/app.js"></script>
     <script>
-        $(function() {
+        $(function () {
             game.GetName();
+        });
+        $("#chat-submit").on("click", function (event) {
+            event.preventDefault();
+            game.TalkSmack();
         });
     </script>
 </body>

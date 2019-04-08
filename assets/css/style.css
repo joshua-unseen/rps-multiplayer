@@ -1,0 +1,13 @@
+#queue-card, #chat-card{
+    position: relative;
+    height: 300px;
+    /* overflow: auto; */
+}
+#queue-box, #chat-box {
+    /* height: 200px; */
+    overflow: auto;
+}
+/* #chat-ig {
+    position: absolute;
+    bottom: 0px;
+} */

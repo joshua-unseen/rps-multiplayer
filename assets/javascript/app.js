@@ -34,30 +34,17 @@ queueRef.on("child_added", function(theChild, prevChild) {
     //  parameter is null when the new child is added, so the bloody thing's 
     //  got to run through 'em all to set onDeck properly.
     game.BuildQueue(theChild, prevChild);
-    // console.log(theChild.key);
-    // console.log(theChild.val());
-    // if (prevChild) {
-    //     return;
-    // }
-    // else {
-    //     console.log("next up: " + theChild.val().name);
-    //     onDeck = theChild.key;
-    //     console.log(onDeck);
-    // }
 });
 
-rootRef.once("value", function (snap) {
+rootRef.on("value", function (snap) {
     //  This function gets the whole bloody DB 'cuz it's got to check size of 
     //  the playersRef db before it moves a record from queue to players.
+    //  can possibly do the entire bloody logic in here, since this one would get called every time something changes...
     game.PushPlayers(snap);
-    // var currentQueue = snap.child("queue");
-    // var targetRecord = currentQueue.child(onDeck);
-    // console.log(snap.val());
-    // console.log(currentQueue);
-    // if (snap.child("players").numChildren() < 2) {
-    //     playersRef.update({ [onDeck]: targetRecord.val() });
-    //     targetRecord.remove();
-    // }
+});
+
+playersRef.once("child_added", function (theChild) {
+    game.ThrowHand(theChild);
 });
 
 /* App flow:
@@ -104,27 +91,63 @@ var game = {
     },
 
     BuildQueue(childSnap, prevSnap) {
-        console.log(childSnap.key);
-        console.log(childSnap.val());
+        // console.log(childSnap.key);
+        // console.log(childSnap.val());
+        // var p = $("<p>").text(childSnap.val().name);
+        // $("#queue-card").append(p);
         if (prevSnap) {
             return;
         }
         else {
-            console.log("next up: " + childSnap.val().name);
+            // console.log("next up: " + childSnap.val().name);
             this.onDeck = childSnap.key;
-            console.log(this.onDeck);
+            // console.log(this.onDeck);
         }
     },
     PushPlayers(dbSnap) {
         var currentQueue = dbSnap.child("queue");
         var targetRecord = currentQueue.child(this.onDeck);
-        console.log(dbSnap.val());
-        console.log(currentQueue);
-        console.log(targetRecord);
+        // Show the queue:
+        $("#queue-box").empty();    
+        currentQueue.forEach(function(childSnap){
+            var p = $("<p>").text(childSnap.val().name);
+            $("#queue-box").append(p);    
+        });
+        var currentChat = dbSnap.child("chat");
+        // show chat messages:
+        $("#chat-box").empty();
+        currentChat.forEach(function(childSnap){
+            console.log(childSnap.val().name);
+            
+            var name = $("<b>").text(childSnap.val().name + "::  ");
+            var message = childSnap.val().message;
+            var p = $("<p>").append(name);
+            p.append(message);
+            $("#chat-box").prepend(p);    
+        });
+        // console.log(dbSnap.val());
+        // console.log(currentQueue);
+        // console.log(targetRecord);
         if (dbSnap.child("players").numChildren() < 2) {
             playersRef.update({ [this.onDeck]: targetRecord.val() });
             queueRef.child(this.onDeck).remove();
         }
 
     },
+    ThrowHand(childSnap) {
+        // if we're in the players list, get our r/p/s choice and update our firebase record
+        // console.log(childSnap.key);
+        if (this.playerID === childSnap.key) {
+            // do the interface thing, then
+            playersRef.child(childSnap.key).update({throw: choiceVar});
+        }
+    },
+    TalkSmack() {
+        var newMessage = {
+            "name": this.playerName,
+            "message": $("#chat-input").val()
+        };
+        $("#chat-input").val("");
+        chatRef.push(newMessage);
+    }
 }
