@@ -28,7 +28,7 @@ amConnected.on("value", function (snap) {
     //    The connections object changes each time the page is reloaded.  Will have to store a UUID in cookie or localStorage.
 });
 
-queueRef.on("child_added", function(theChild, prevChild) {
+queueRef.on("child_added", function (theChild, prevChild) {
     //  This is ... ugly.  This function runs every time a child gets added to 
     //  queueRef.  It's .on, not .once, 'cuz for some reason the prevChild
     //  parameter is null when the new child is added, so the bloody thing's 
@@ -108,46 +108,57 @@ var game = {
         var currentQueue = dbSnap.child("queue");
         var targetRecord = currentQueue.child(this.onDeck);
         // Show the queue:
-        $("#queue-box").empty();    
-        currentQueue.forEach(function(childSnap){
+        $("#queue-box").empty();
+        currentQueue.forEach(function (childSnap) {
             var p = $("<p>").text(childSnap.val().name);
-            $("#queue-box").append(p);    
+            $("#queue-box").append(p);
         });
         var currentChat = dbSnap.child("chat");
         // show chat messages:
         $("#chat-box").empty();
-        currentChat.forEach(function(childSnap){
+        currentChat.forEach(function (childSnap) {
             console.log(childSnap.val().name);
-            
             var name = $("<b>").text(childSnap.val().name + "::  ");
             var message = childSnap.val().message;
             var p = $("<p>").append(name);
             p.append(message);
-            $("#chat-box").prepend(p);    
+            $("#chat-box").prepend(p);
         });
         // console.log(dbSnap.val());
         // console.log(currentQueue);
         // console.log(targetRecord);
-        if (dbSnap.child("players").numChildren() < 2) {
+        var currentPlayers = dbSnap.child("players");
+        if (currentPlayers.numChildren() < 2) {
             playersRef.update({ [this.onDeck]: targetRecord.val() });
             queueRef.child(this.onDeck).remove();
         }
-
+        // Handle the players display:
+        var i = 1;
+        currentPlayers.forEach(function (childSnap) {
+            var prefix = "#p" + i + "-";
+            $(prefix + "name").text(childSnap.val().name);
+            $(prefix + "wins").text(childSnap.val().wins);
+            $(prefix + "losses").text(childSnap.val().losses);
+            i++;
+        });
     },
     ThrowHand(childSnap) {
         // if we're in the players list, get our r/p/s choice and update our firebase record
         // console.log(childSnap.key);
         if (this.playerID === childSnap.key) {
             // do the interface thing, then
-            playersRef.child(childSnap.key).update({throw: choiceVar});
+            playersRef.child(childSnap.key).update({ throw: choiceVar });
         }
     },
     TalkSmack() {
-        var newMessage = {
-            "name": this.playerName,
-            "message": $("#chat-input").val()
-        };
-        $("#chat-input").val("");
-        chatRef.push(newMessage);
+        var message = $("#chat-input").val();
+        if (this.playerName && message) {
+            var newMessage = {
+                "name": this.playerName,
+                "message": $("#chat-input").val()
+            };
+            $("#chat-input").val("");
+            chatRef.push(newMessage);
+        }
     }
 }
