@@ -61,12 +61,14 @@
                     <div class="card-header">Smack Talk</div>
                     <div class="container" id="chat-box"></div>
                     <div class="card-footer">
-                        <div class="input-group" id="chat-ig">
-                            <input type="text" class="form-control" id="chat-input" placeholder="Talk yo' smack">
-                            <div class="input-group-append">
-                                <button type="submit" class="btn btn-primary" id="chat-submit">Submit</button>
+                        <form>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="chat-input" placeholder="Talk yo' smack">
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-primary" id="chat-submit">Submit</button>
+                                </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -81,11 +83,11 @@
     <script src="assets/javascript/app.js"></script>
     <script>
         $(function () {
+            $("#chat-submit").on("click", function (event) {
+                event.preventDefault();
+                game.TalkSmack();
+            });
             game.GetName();
-        });
-        $("#chat-submit").on("click", function (event) {
-            event.preventDefault();
-            game.TalkSmack();
         });
     </script>
 </body>
