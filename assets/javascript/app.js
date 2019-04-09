@@ -96,6 +96,7 @@ var game = {
         // console.log(childSnap.key);
         // console.log(childSnap.val());
         // yup, the jQuery code is duped in PushPlayers.  Consider moving all of it there...
+        // Don't need onDeck, so we don't need this method and its associated listener.
         var p = $("<p>").text(childSnap.val().name);
         $("#queue-card").append(p);
         if (prevSnap) {
