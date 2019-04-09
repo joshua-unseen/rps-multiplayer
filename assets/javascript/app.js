@@ -20,19 +20,21 @@ var amConnected = base.ref(".info/connected");
 
 var onDeck = "";
 
-amConnected.on("value", function (snap) {
-    if (snap.val()) {
-        var con = connRef.push(true);
-        con.onDisconnect().remove();
-    }
-    //    The connections object changes each time the page is reloaded.  Will have to store a UUID in cookie or localStorage.
-});
+// amConnected.on("value", function (snap) {
+//     if (snap.val()) {
+//         var con = connRef.push(true);
+//         con.onDisconnect().remove();
+//     }
+//     //    The connections object changes each time the page is reloaded.  Will have to store a UUID in cookie or localStorage.
+// });
 
-queueRef.on("child_added", function (theChild, prevChild) {
+queueRef.once("child_added", function (theChild, prevChild) {
     //  This is ... ugly.  This function runs every time a child gets added to 
     //  queueRef.  It's .on, not .once, 'cuz for some reason the prevChild
     //  parameter is null when the new child is added, so the bloody thing's 
     //  got to run through 'em all to set onDeck properly.
+    //  Maybe I can do this .once, if I pull the display logic out.
+    //  It depends on whether it listens once per connection, or once per db...
     game.BuildQueue(theChild, prevChild);
 });
 
@@ -70,7 +72,7 @@ We'll need a few database nodes, say:
 */
 
 var game = {
-    onDeck: "",
+    //onDeck: "",   Don't actually need this, yay.
     playerName: "", // maybe don't need to store this...
     playerRef: "",  // reference to the player's node.  Not sure it'll update when we start moving things around, so:
     playerID: "",   // store the key/uuid here
@@ -93,20 +95,24 @@ var game = {
     BuildQueue(childSnap, prevSnap) {
         // console.log(childSnap.key);
         // console.log(childSnap.val());
-        // var p = $("<p>").text(childSnap.val().name);
-        // $("#queue-card").append(p);
+        // yup, the jQuery code is duped in PushPlayers.  Consider moving all of it there...
+        var p = $("<p>").text(childSnap.val().name);
+        $("#queue-card").append(p);
         if (prevSnap) {
             return;
         }
         else {
             // console.log("next up: " + childSnap.val().name);
             this.onDeck = childSnap.key;
-            // console.log(this.onDeck);
+            console.log(this.onDeck);
         }
     },
     PushPlayers(dbSnap) {
+        // Okay, this one's doing my head in.  This function gets called 
+        // every time a change is made to the database, so it can contain
+        // NO loops that alter the DB, since every alteration will kick off
+        // its own version of the loop...
         var currentQueue = dbSnap.child("queue");
-        var targetRecord = currentQueue.child(this.onDeck);
         // Show the queue:
         $("#queue-box").empty();
         currentQueue.forEach(function (childSnap) {
@@ -117,20 +123,29 @@ var game = {
         // show chat messages:
         $("#chat-box").empty();
         currentChat.forEach(function (childSnap) {
-            console.log(childSnap.val().name);
+            // console.log(childSnap.val().name);
             var name = $("<b>").text(childSnap.val().name + "::  ");
             var message = childSnap.val().message;
             var p = $("<p>").append(name);
             p.append(message);
             $("#chat-box").prepend(p);
         });
-        // console.log(dbSnap.val());
-        // console.log(currentQueue);
-        // console.log(targetRecord);
+        console.log(dbSnap.val());
         var currentPlayers = dbSnap.child("players");
-        if (currentPlayers.numChildren() < 2) {
-            playersRef.update({ [this.onDeck]: targetRecord.val() });
-            queueRef.child(this.onDeck).remove();
+        var targetRecord = currentQueue.child(this.onDeck);
+        console.log(targetRecord.val());
+        if (currentPlayers.numChildren() < 2 && currentQueue.hasChildren()) {
+            //  Holy hell, this runs even if there's nothing in /queue.  Did not expect that, for some reason.  Added the hasChildren() check to keep that from happening.
+            //  Oh, right: if there's nothing in /queue, onDeck is null, and targetRecord is null, so I was just pushing null values to /players.  Durrr.
+            //  this.onDeck is a locally stored variable.  I think there's a way to do this without, but it can't be a loop..
+            // playersRef.update({ [this.onDeck]: targetRecord.val() });
+            // queueRef.child(this.onDeck).remove();
+            // Let's try:
+            currentQueue.forEach(function(childSnap){
+                playersRef.update({[childSnap.key]: childSnap.val()});
+                queueRef.child(childSnap.key).remove();
+                return true;
+            });
         }
         // Handle the players display:
         var i = 1;
@@ -144,10 +159,14 @@ var game = {
     },
     ThrowHand(childSnap) {
         // if we're in the players list, get our r/p/s choice and update our firebase record
+        // Move this one into PushPlayers() too.  And change the damn name.
         // console.log(childSnap.key);
         if (this.playerID === childSnap.key) {
-            // do the interface thing, then
-            playersRef.child(childSnap.key).update({ throw: choiceVar });
+            // do the interface thing
+            var fightModal = $("#fight-modal").modal({ backdrop: "static", keyboard: false });
+            fightModal.modal("show");
+
+            // playersRef.child(childSnap.key).update({ throw: choiceVar });
         }
     },
     TalkSmack() {
