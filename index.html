@@ -86,12 +86,12 @@
                     </button>
                 </div>
                 <div class="modal-body" id="fight-div">
-                    <button id="rock-button" class="btn btn-primary">Rock</button>
-                    <button id="paper-button" class="btn btn-primary">Paper</button>
-                    <button id="Scissors-button" class="btn btn-primary">Scissors</button>
+                    <button id="rock-button" class="btn btn-primary" value="rock">Rock</button>
+                    <button id="paper-button" class="btn btn-primary" value="paper">Paper</button>
+                    <button id="Scissors-button" class="btn btn-primary" value="scissors">Scissors</button>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
                 </div>
             </div>
         </div>
@@ -105,6 +105,9 @@
     <script src="assets/javascript/app.js"></script>
     <script>
         $(function () {
+            $("#fight-div > button").on("click", function(){
+                game.DoChoice($(this).val());
+            });
             $("#chat-submit").on("click", function (event) {
                 event.preventDefault();
                 game.TalkSmack();
