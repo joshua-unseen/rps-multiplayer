@@ -79,7 +79,6 @@ var game = {
             this.playerName = prompt("Enter your name:");
         }
         this.fightModal.modal("hide");
-        $("#fight-title").text("Fight!");
         // Gonna use this as a reset, too. Maybe change this to a modal if I've got time.
         this.result = "";
         this.opponent = "";
@@ -103,6 +102,7 @@ var game = {
 
         var currentQueue = dbSnap.child("queue");
         // Show the queue:
+        // todo: win/loss count in the queue.  Maybe a nice table...
         $("#queue-box").empty();
         currentQueue.forEach(function (childSnap) {
             var p = $("<p>").text(childSnap.val().name);
@@ -161,7 +161,7 @@ var game = {
                             console.log(game.losses);
                             game.playerRef.remove();    // this'll trigger an update
                             game.GetName();     // as will this, but I don't think it will trigger processing.
-                            return true;
+                            return true;    // No loops!
                         case "rr":
                         case "pp":
                         case "ss":

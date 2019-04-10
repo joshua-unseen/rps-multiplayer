@@ -85,10 +85,10 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body" id="fight-div">
-                    <button id="rock-button" class="btn btn-primary" value="r">Rock</button>
-                    <button id="paper-button" class="btn btn-primary" value="p">Paper</button>
-                    <button id="Scissors-button" class="btn btn-primary" value="s">Scissors</button>
+                <div class="modal-body d-flex justify-content-around" id="fight-div">
+                    <button id="rock-button" class="btn btn-primary btn-lg" value="r">Rock</button>
+                    <button id="paper-button" class="btn btn-primary btn-lg" value="p">Paper</button>
+                    <button id="Scissors-button" class="btn btn-primary btn-lg" value="s">Scissors</button>
                 </div>
                 <div class="modal-footer">
                     <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
@@ -107,6 +107,9 @@
         $(function () {
             $("#fight-div > button").on("click", function(){
                 game.DoChoice($(this).val());
+            });
+            $("#fight-modal").on("hidden.bs.modal", function (){
+                $("#fight-title").text("Fight!");
             });
             $("#chat-submit").on("click", function (event) {
                 event.preventDefault();
