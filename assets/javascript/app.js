@@ -66,11 +66,27 @@ var game = {
         "wins": 0,
         "losses": 0,
     },
+    wins: 0,
+    losses: 0,
+    throw: "",
+    opponent: "",
+    result: "",
+
+    fightModal: $("#fight-modal").modal({ backdrop: "static", keyboard: false, show: false }),
 
     GetName() {
-        this.playerName = prompt("Enter your name:");
-        // console.log(this.playerName);
+        if (this.playerName.length === 0) {
+            this.playerName = prompt("Enter your name:");
+        }
+        this.fightModal.modal("hide");
+        $("#fight-title").text("Fight!");
+        // Gonna use this as a reset, too. Maybe change this to a modal if I've got time.
+        this.result = "";
+        this.opponent = "";
+        this.throw = "";
         this.playerObj.name = this.playerName;
+        this.playerObj.wins = this.wins;
+        this.playerObj.losses = this.losses;
         this.playerRef = queueRef.push(this.playerObj);
         this.playerRef.update({ uuid: this.playerRef.key });  // think I've figured out how to make this unnecessary, but I'll keep it for now.
         this.playerID = this.playerRef.key;   // store the key to access the obj later!
@@ -124,8 +140,47 @@ var game = {
         //  Prompt the players for their choice of weapons, but wait until there are 2.
         else if (currentPlayers.numChildren() === 2) {
             currentPlayers.forEach(function (childSnap) {
-                if (game.playerID === childSnap.key && childSnap.child("throw").exists() === false) {
+                // console.log(childSnap.val());
+                if (childSnap.key === game.playerID && childSnap.child("throw").exists() === false) {
                     game.ThrowHand();
+                }
+                else if (childSnap.key !== game.playerID) {
+                    game.opponent = childSnap.key;  // store the opponent so we can access their throw value
+                }
+                if (currentPlayers.child(game.playerID + "/throw").exists()
+                    && currentPlayers.child(game.opponent + "/throw").exists()) {
+                    var result = game.throw + currentPlayers.child(game.opponent + "/throw").val();
+                    console.log(result);
+                    switch (result) {
+                        case "rp":
+                        case "ps":
+                        case "sr":
+                            // lose!  Go to the back of the line.
+                            $("#fight-title").text("Lose!");
+                            game.losses++;
+                            console.log(game.losses);
+                            game.playerRef.remove();    // this'll trigger an update
+                            game.GetName();     // as will this, but I don't think it will trigger processing.
+                            return true;
+                        case "rr":
+                        case "pp":
+                        case "ss":
+                            // tie, do it again...
+                            $("#fight-title").text("Tie.  Throw again.");
+                            game.playerRef.update({throw: null});
+                            return true;
+                        case "pr":
+                        case "sp":
+                        case "rs":
+                            //win! Stay and play the next opponent.
+                            // game.fightModal.modal("hide");
+                            // game.throw = "";
+                            $("#fight-title").text("Win!");
+                            game.wins++;
+                            console.log(game.wins);
+                            game.playerRef.update({ wins: game.wins, throw: null });  // update triggered.
+                            return true;
+                    }
                 }
             });
         }
@@ -151,14 +206,14 @@ var game = {
     ThrowHand() {
         // do the interface thing
         // Dangit.  Need to make fightModal a property, or redo something else.
-        var fightModal = $("#fight-modal").modal({ backdrop: "static", keyboard: false });
-        fightModal.modal("show");
+        // var fightModal = $("#fight-modal").modal({ backdrop: "static", keyboard: false });
+        this.fightModal.modal("show");
 
         // playersRef.child(childSnap.key).update({ throw: choiceVar });
     },
     DoChoice(choice) {
+        this.throw = choice;
         this.playerRef.update({ throw: choice });
-//        fightModal.modal("hide"); // Probably going to do this elsewhere...
     },
     TalkSmack() {
         var message = $("#chat-input").val();

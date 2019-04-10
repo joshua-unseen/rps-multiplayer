@@ -29,7 +29,7 @@
                 <!-- Player "one" -->
                 <div class="card mb-3">
                     <div class="card-header">Player 1</div>
-                    <h5 class="card-title" id="p1-name">Player 1</h5>
+                    <h5 class="card-title" id="p1-name">Waiting for Player 1</h5>
                     <p>Wins: <span id="p1-wins"></span></p>
                     <p>Losses: <span id="p1-losses"></span></p>
                     <p>Choice: <span id="p1-choice"></span></p>
@@ -39,7 +39,7 @@
                 <!-- Player "two" -->
                 <div class="card mb-3">
                     <div class="card-header">Player 2</div>
-                    <h5 class="card-title" id="p2-name">Player 2</h5>
+                    <h5 class="card-title" id="p2-name">Waiting for Player 2</h5>
                     <p>Wins: <span id="p2-wins"></span></p>
                     <p>Losses: <span id="p2-losses"></span></p>
                     <p>Choice: <span id="p2-choice"></span></p>
@@ -80,15 +80,15 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Fight!</h5>
+                    <h5 class="modal-title" id="fight-title">Fight!</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body" id="fight-div">
-                    <button id="rock-button" class="btn btn-primary" value="rock">Rock</button>
-                    <button id="paper-button" class="btn btn-primary" value="paper">Paper</button>
-                    <button id="Scissors-button" class="btn btn-primary" value="scissors">Scissors</button>
+                    <button id="rock-button" class="btn btn-primary" value="r">Rock</button>
+                    <button id="paper-button" class="btn btn-primary" value="p">Paper</button>
+                    <button id="Scissors-button" class="btn btn-primary" value="s">Scissors</button>
                 </div>
                 <div class="modal-footer">
                     <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
