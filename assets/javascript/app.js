@@ -73,8 +73,27 @@ var game = {
     result: "",
 
     fightModal: $("#fight-modal").modal({ backdrop: "static", keyboard: false, show: false }),
+    hiModal: $("#introduce").modal({ backdrop: "static", keyboard: false, show: false }),
 
     GetName() {
+        this.hiModal.modal("show");
+        $("#name-button").on("click", function (event) {
+            event.preventDefault();
+
+            var inputVal = $("#name-input").val();
+            if (inputVal) {
+                $("#name-input").val("");
+                game.hiModal.modal("hide");
+                game.SetName(inputVal);
+
+            }
+        });
+    },
+    SetName(name) {
+        this.playerName = name;
+        this.Setup();
+    },
+    Setup() {
         if (this.playerName.length === 0) {
             this.playerName = prompt("Enter your name:");
         }
@@ -87,7 +106,7 @@ var game = {
         this.playerObj.wins = this.wins;
         this.playerObj.losses = this.losses;
         this.playerRef = queueRef.push(this.playerObj);
-        this.playerRef.update({ uuid: this.playerRef.key });  // think I've figured out how to make this unnecessary, but I'll keep it for now.
+        // this.playerRef.update({ uuid: this.playerRef.key });  // think I've figured out how to make this unnecessary, but I'll keep it for now.
         this.playerID = this.playerRef.key;   // store the key to access the obj later!
         console.log(this.playerID);
 
@@ -102,11 +121,16 @@ var game = {
 
         var currentQueue = dbSnap.child("queue");
         // Show the queue:
-        // todo: win/loss count in the queue.  Maybe a nice table...
         $("#queue-box").empty();
         currentQueue.forEach(function (childSnap) {
-            var p = $("<p>").text(childSnap.val().name);
-            $("#queue-box").append(p);
+            console.log(childSnap.val().name)
+            var tr = $("<tr>")
+            var valArray = ["name", "wins", "losses"];
+            for (i = 0; i < 3; i++) {
+                var td = $("<td>").text(childSnap.val()[valArray[i]]);
+                tr.append(td);
+            }
+            $("#queue-box").append(tr);
         });
 
         var currentChat = dbSnap.child("chat");
@@ -151,36 +175,8 @@ var game = {
                     && currentPlayers.child(game.opponent + "/throw").exists()) {
                     var result = game.throw + currentPlayers.child(game.opponent + "/throw").val();
                     console.log(result);
-                    switch (result) {
-                        case "rp":
-                        case "ps":
-                        case "sr":
-                            // lose!  Go to the back of the line.
-                            $("#fight-title").text("Lose!");
-                            game.losses++;
-                            console.log(game.losses);
-                            game.playerRef.remove();    // this'll trigger an update
-                            game.GetName();     // as will this, but I don't think it will trigger processing.
-                            return true;    // No loops!
-                        case "rr":
-                        case "pp":
-                        case "ss":
-                            // tie, do it again...
-                            $("#fight-title").text("Tie.  Throw again.");
-                            game.playerRef.update({throw: null});
-                            return true;
-                        case "pr":
-                        case "sp":
-                        case "rs":
-                            //win! Stay and play the next opponent.
-                            // game.fightModal.modal("hide");
-                            // game.throw = "";
-                            $("#fight-title").text("Win!");
-                            game.wins++;
-                            console.log(game.wins);
-                            game.playerRef.update({ wins: game.wins, throw: null });  // update triggered.
-                            return true;
-                    }
+                    game.CalcWinner(result);
+                    return true;    // No loops!
                 }
             });
         }
@@ -193,31 +189,55 @@ var game = {
             $(prefix + "losses").text(childSnap.val().losses);
             i++;
         });
-        //  Handle the 'combat'.  (going to try to do most of it in a method...)
-        //  On a win, increment wins.
-        //  Win conditions:
-        //      this.playerID.rock && this.opponent.scissors,
-        //      this.pID.paper && this.opponent.rock,
-        //      this.pID.scissors && this.opponent.paper
-        //  So...  Gonna need to store 'opponent' locally...
-        //  On a loss, increment losses, and bump the player-- easiest: alter GetName() to not prompt for a name if it already exits...
-        //  On a tie, throw again..
     },
+
+    CalcWinner(res) {
+        switch (res) {
+            case "rp":
+            case "ps":
+            case "sr":
+                // lose!  Go to the back of the line.
+                $("#fight-title").text("Lose!");
+                this.losses++;
+                console.log(this.losses);
+                this.playerRef.remove();    // this'll trigger an update
+                this.GetName();     // as will this, but I don't think it will trigger processing.
+                break;
+            case "rr":
+            case "pp":
+            case "ss":
+                // tie, do it again...
+                $("#fight-title").text("Tie.  Throw again.");
+                this.playerRef.update({ throw: null });
+                break;
+            case "pr":
+            case "sp":
+            case "rs":
+                //win! Stay and play the next opponent.
+                // this.fightModal.modal("hide");
+                // this.throw = "";
+                $("#fight-title").text("Win!");
+                this.wins++;
+                console.log(this.wins);
+                this.playerRef.update({ wins: this.wins, throw: null });  // update triggered.
+                break;
+        }
+
+    },
+
     ThrowHand() {
         // do the interface thing
-        // Dangit.  Need to make fightModal a property, or redo something else.
-        // var fightModal = $("#fight-modal").modal({ backdrop: "static", keyboard: false });
         this.fightModal.modal("show");
-
-        // playersRef.child(childSnap.key).update({ throw: choiceVar });
     },
+
     DoChoice(choice) {
         this.throw = choice;
         this.playerRef.update({ throw: choice });
     },
+
     TalkSmack() {
         var message = $("#chat-input").val();
-        if (this.playerName && message) {
+        if (this.playerName && message) {   // don't push anything to the DB unless there's something to push.
             var newMessage = {
                 "name": this.playerName,
                 "message": $("#chat-input").val()

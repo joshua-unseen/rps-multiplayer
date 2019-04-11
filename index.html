@@ -20,7 +20,9 @@
         <div class="row">
             <div class="col">
                 <!-- Header area -- show wins/losses and current queue postion? -->
-                <div class="jumbotron"></div>
+                <div class="jumbotron text-center">
+                    <h1>RPS Smackdown!</h1>
+                </div>
             </div>
         </div>
         <div class="row">
@@ -29,20 +31,24 @@
                 <!-- Player "one" -->
                 <div class="card mb-3">
                     <div class="card-header">Player 1</div>
-                    <h5 class="card-title" id="p1-name">Waiting for Player 1</h5>
-                    <p>Wins: <span id="p1-wins"></span></p>
-                    <p>Losses: <span id="p1-losses"></span></p>
-                    <p>Choice: <span id="p1-choice"></span></p>
+                    <div class="container">
+                        <h5 class="card-title" id="p1-name">Waiting for Player 1</h5>
+                        <p>Wins: <span id="p1-wins"></span></p>
+                        <p>Losses: <span id="p1-losses"></span></p>
+                        <!-- <p>Choice: <span id="p1-choice"></span></p> -->
+                    </div>
                 </div>
             </div>
             <div class="col">
                 <!-- Player "two" -->
                 <div class="card mb-3">
                     <div class="card-header">Player 2</div>
-                    <h5 class="card-title" id="p2-name">Waiting for Player 2</h5>
-                    <p>Wins: <span id="p2-wins"></span></p>
-                    <p>Losses: <span id="p2-losses"></span></p>
-                    <p>Choice: <span id="p2-choice"></span></p>
+                    <div class="container">
+                        <h5 class="card-title" id="p2-name">Waiting for Player 2</h5>
+                        <p>Wins: <span id="p2-wins"></span></p>
+                        <p>Losses: <span id="p2-losses"></span></p>
+                        <!-- <p>Choice: <span id="p2-choice"></span></p> -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -50,20 +56,31 @@
             <!-- Waiting area -->
             <div class="col">
                 <!-- Queue -->
-                <div class="card" id="chat-card">
+                <div class="card position-relative" id="queue-card">
                     <div class="card-header">Queue</div>
-                    <div class="container" id="queue-box"></div>
+                    <div class="container overflow-auto">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Player</th>
+                                    <th>Wins</th>
+                                    <th>Losses</th>
+                                </tr>
+                            </thead>
+                            <tbody id="queue-box"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
             <div class="col">
                 <!-- Chat -->
-                <div class="card" id="chat-card">
+                <div class="card position-relative" id="chat-card">
                     <div class="card-header">Smack Talk</div>
-                    <div class="container" id="chat-box"></div>
+                    <div class="container overflow-auto" id="chat-box"></div>
                     <div class="card-footer">
                         <form>
                             <div class="input-group">
-                                <input type="text" class="form-control" id="chat-input" placeholder="Talk yo' smack">
+                                <input type="text" class="form-control" id="chat-input" placeholder="Talk some smack">
                                 <div class="input-group-append">
                                     <button type="submit" class="btn btn-primary" id="chat-submit">Submit</button>
                                 </div>
@@ -81,9 +98,9 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="fight-title">Fight!</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
-                    </button>
+                    </button> -->
                 </div>
                 <div class="modal-body d-flex justify-content-around" id="fight-div">
                     <button id="rock-button" class="btn btn-primary btn-lg" value="r">Rock</button>
@@ -96,6 +113,29 @@
             </div>
         </div>
     </div>
+    <!-- Introduce Yourself -->
+    <div class="modal fade" id="introduce" tabindex="-1" role="dialog" aria-labelledby="Name Input" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Join the Fight!</h5>
+                    <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button> -->
+                </div>
+                <form>
+                <div class="modal-body">
+                        <input type="text" id="name-input" class="form-control" placeholder="Type your name">
+                    </div>
+                    <div class="modal-footer">
+                        <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+                        <input type="submit" class="btn btn-primary" id="name-button" value="GO!">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
         integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
         crossorigin="anonymous"></script>
@@ -105,17 +145,20 @@
     <script src="assets/javascript/app.js"></script>
     <script>
         $(function () {
-            $("#fight-div > button").on("click", function(){
+            $("#fight-div > button").on("click", function () {
                 game.DoChoice($(this).val());
             });
-            $("#fight-modal").on("hidden.bs.modal", function (){
+
+            $("#fight-modal").on("hidden.bs.modal", function () {
                 $("#fight-title").text("Fight!");
             });
+
             $("#chat-submit").on("click", function (event) {
                 event.preventDefault();
                 game.TalkSmack();
             });
-            game.GetName();
+
+            game.Setup();
         });
     </script>
 </body>
