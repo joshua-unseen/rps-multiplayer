@@ -8,4 +8,4 @@ Allows an arbitrarily large group of internet users to play Rock/Paper/Scissors 
 Javascript with a Firebase backend.
 
 ## What did you want to do with it that you couldn't?
-Modal name prompt, and a modal victory display with a timeout.
+Modal name prompt, and a modal victory display with a timeout.  Ran out of time to make it work.
