@@ -76,7 +76,7 @@ var game = {
 
     Setup() {
         if (this.playerName.length === 0) {
-            this.playerName = prompt("Enter your name:");
+            this.playerName = prompt("Enter your name:");   // Tried to take this modal, but the playerRef didn't work properly.  Which is odd, because Setup() works fine on the subsequent calls when the prompt doesn't trigger.
         }
         this.fightModal.modal("hide");
         // Gonna use this as a reset, too. Maybe change this to a modal if I've got time.
