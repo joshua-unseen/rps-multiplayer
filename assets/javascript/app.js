@@ -73,26 +73,7 @@ var game = {
     result: "",
 
     fightModal: $("#fight-modal").modal({ backdrop: "static", keyboard: false, show: false }),
-    hiModal: $("#introduce").modal({ backdrop: "static", keyboard: false, show: false }),
 
-    GetName() {
-        this.hiModal.modal("show");
-        $("#name-button").on("click", function (event) {
-            event.preventDefault();
-
-            var inputVal = $("#name-input").val();
-            if (inputVal) {
-                $("#name-input").val("");
-                game.hiModal.modal("hide");
-                game.SetName(inputVal);
-
-            }
-        });
-    },
-    SetName(name) {
-        this.playerName = name;
-        this.Setup();
-    },
     Setup() {
         if (this.playerName.length === 0) {
             this.playerName = prompt("Enter your name:");
