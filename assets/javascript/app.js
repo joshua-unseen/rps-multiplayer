@@ -182,7 +182,7 @@ var game = {
                 this.losses++;
                 console.log(this.losses);
                 this.playerRef.remove();    // this'll trigger an update
-                this.GetName();     // as will this, but I don't think it will trigger processing.
+                this.Setup();     // as will this, but I don't think it will trigger processing.
                 break;
             case "rr":
             case "pp":
