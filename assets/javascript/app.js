@@ -104,7 +104,7 @@ var game = {
         // Show the queue:
         $("#queue-box").empty();
         currentQueue.forEach(function (childSnap) {
-            console.log(childSnap.val().name)
+            // console.log(childSnap.val().name)
             var tr = $("<tr>")
             var valArray = ["name", "wins", "losses"];
             for (i = 0; i < 3; i++) {
@@ -150,18 +150,20 @@ var game = {
         else if (currentPlayers.numChildren() === 2) {
             currentPlayers.forEach(function (childSnap) {
                 // console.log(childSnap.val());
-                if (childSnap.key === game.playerID && childSnap.child("throw").exists() === false) {
-                    game.ThrowHand();
-                }
-                else if (childSnap.key !== game.playerID) {
+                if (childSnap.key !== game.playerID) {
                     game.opponent = childSnap.key;  // store the opponent so we can access their throw value
+                }
+                else if (childSnap.key === game.playerID && childSnap.child("throw").exists() === false) {
+                    game.ThrowHand();
                 }
                 if (currentPlayers.child(game.playerID + "/throw").exists()
                     && currentPlayers.child(game.opponent + "/throw").exists()) {
-                    var result = game.throw + currentPlayers.child(game.opponent + "/throw").val();
-                    console.log(result);
-                    game.CalcWinner(result);
-                    return true;    // No loops!
+                    if (game.playerID === childSnap.key) {
+                        var result = game.throw + currentPlayers.child(game.opponent + "/throw").val();
+                        console.log(result);
+                        game.CalcWinner(result);
+                        return true;    // No loops!
+                    }
                 }
             });
         }
@@ -187,7 +189,9 @@ var game = {
                 console.log(this.losses);
                 this.playerRef.remove();    // this'll trigger an update
                 this.fightModal.modal("hide");
-                this.fightModal.on("hidden.bs.modal", function(){
+                this.fightModal.on("hidden.bs.modal", function () {
+                    $("#fight-title").text("Fight!");
+                    game.fightModal.modal("dispose");
                     game.Setup();     // as will this, but I don't think it will trigger processing.
                 });
                 break;
@@ -203,7 +207,7 @@ var game = {
             case "rs":
                 //win! Stay and play the next opponent.
                 // this.fightModal.modal("hide");
-                // this.throw = "";
+                this.throw = "";
                 $("#fight-title").text("Win!");
                 this.wins++;
                 console.log(this.wins);

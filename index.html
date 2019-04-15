@@ -127,10 +127,6 @@
                 game.DoChoice($(this).val());
             });
 
-            $("#fight-modal").on("hidden.bs.modal", function () {
-                $("#fight-title").text("Fight!");
-            });
-
             $("#chat-submit").on("click", function (event) {
                 event.preventDefault();
                 game.TalkSmack();
