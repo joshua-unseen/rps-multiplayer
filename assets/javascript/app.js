@@ -78,7 +78,6 @@ var game = {
         if (this.playerName.length === 0) {
             this.playerName = prompt("Enter your name:");   // Tried to take this modal, but the playerRef didn't work properly.  Which is odd, because Setup() works fine on the subsequent calls when the prompt doesn't trigger.
         }
-        this.fightModal.modal("hide");
         // Gonna use this as a reset, too. Maybe change this to a modal if I've got time.
         this.result = "";
         this.opponent = "";
@@ -86,10 +85,11 @@ var game = {
         this.playerObj.name = this.playerName;
         this.playerObj.wins = this.wins;
         this.playerObj.losses = this.losses;
-        this.playerRef = queueRef.push(this.playerObj);
+        this.playerRef = queueRef.push();
         // this.playerRef.update({ uuid: this.playerRef.key });  // think I've figured out how to make this unnecessary, but I'll keep it for now.
         this.playerID = this.playerRef.key;   // store the key to access the obj later!
         console.log(this.playerID);
+        this.playerRef.update(this.playerObj);
 
         this.playerRef.onDisconnect().remove();
     },
@@ -133,13 +133,17 @@ var game = {
             // Let's try:
             currentQueue.forEach(function (childSnap) {
                 //  I know I said no loops up there, but "return true;" ends the forEach() at one iteration, so it's not really a loop, is it?
-                playersRef.update({ [childSnap.key]: childSnap.val() });
-                console.log(game.playerRef);
-                queueRef.child(childSnap.key).remove();
-                game.playerRef.path.pieces_[0] = "players";
-                game.playerRef.onDisconnect().remove();
-                console.log(game.playerRef);
-                return true;
+                if (childSnap.key === game.playerID) {
+                    var update = {};
+                    update["/players/" + childSnap.key] = childSnap.val();
+                    update["/queue/" + childSnap.key] = null;
+                    rootRef.update(update);
+                    console.log(game.playerRef);
+                    game.playerRef.path.pieces_[0] = "players";
+                    game.playerRef.onDisconnect().remove();
+                    console.log(game.playerRef);
+                    return true;
+                }
             });
         }
         //  Prompt the players for their choice of weapons, but wait until there are 2.
@@ -182,7 +186,10 @@ var game = {
                 this.losses++;
                 console.log(this.losses);
                 this.playerRef.remove();    // this'll trigger an update
-                this.Setup();     // as will this, but I don't think it will trigger processing.
+                this.fightModal.modal("hide");
+                this.fightModal.on("hidden.bs.modal", function(){
+                    game.Setup();     // as will this, but I don't think it will trigger processing.
+                });
                 break;
             case "rr":
             case "pp":
