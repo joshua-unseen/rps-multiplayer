@@ -189,11 +189,6 @@ var game = {
                 console.log(this.losses);
                 this.playerRef.remove();    // this'll trigger an update
                 this.fightModal.modal("hide");
-                this.fightModal.on("hidden.bs.modal", function () {
-                    $("#fight-title").text("Fight!");
-                    game.fightModal.modal("dispose");
-                    game.Setup();     // as will this, but I don't think it will trigger processing.
-                });
                 break;
             case "rr":
             case "pp":
